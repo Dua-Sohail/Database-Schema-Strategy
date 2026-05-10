@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import mysql.connector
+import sqlite3
 
 st.set_page_config(page_title="User Registration", layout="centered")
 
@@ -12,12 +12,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def connect_db():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="abcd",
-        database="schema_project"
-    )
+    conn = sqlite3.connect("schema_project.db")
+    return conn
 
 st.title("User Registration")
 st.markdown("<p style='color:gray;'>Fill in the form below to register.</p>", unsafe_allow_html=True)
@@ -26,8 +22,13 @@ st.markdown("---")
 # Get current columns dynamically
 conn = connect_db()
 cursor = conn.cursor()
-cursor.execute("SHOW COLUMNS FROM users")
-all_columns = [col[0] for col in cursor.fetchall()]
+
+# SQLite-compatible query
+cursor.execute("PRAGMA table_info(users)")
+
+# Extract column names
+all_columns = [col[1] for col in cursor.fetchall()]
+
 conn.close()
 
 # Fixed fields
